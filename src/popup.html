@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cookie Editor Pro</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0f1117;
+      --bg2: #171922;
+      --bg3: #1e2130;
+      --bg4: #252840;
+      --border: rgba(255,255,255,0.07);
+      --border-strong: rgba(255,255,255,0.13);
+      --blue: #4f8ef7;
+      --blue-dim: rgba(79,142,247,0.12);
+      --blue-dim2: rgba(79,142,247,0.22);
+      --text: #e8eaf0;
+      --text2: #8b90a8;
+      --text3: #555a72;
+      --green: #3ecf8e;
+      --green-dim: rgba(62,207,142,0.12);
+      --red: #f76f6f;
+      --red-dim: rgba(247,111,111,0.12);
+      --amber: #f0a04b;
+      --radius: 8px;
+      --radius-lg: 12px;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      width: 460px;
+      min-height: 520px;
+      max-height: 600px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      font-size: 13px;
+    }
+
+    /* ── Header ── */
+    header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 16px 12px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg2);
+      flex-shrink: 0;
+    }
+    .logo {
+      width: 28px; height: 28px;
+      background: var(--blue);
+      border-radius: 7px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 15px;
+    }
+    header h1 { font-size: 14px; font-weight: 600; letter-spacing: -0.2px; flex: 1; }
+    header .domain-chip {
+      font-size: 11px; color: var(--text2);
+      background: var(--bg3);
+      border: 1px solid var(--border-strong);
+      padding: 3px 8px; border-radius: 20px;
+      max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+
+    /* ── Permission Screen ── */
+    #perm-screen {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 32px 24px; gap: 20px; text-align: center;
+    }
+    .perm-icon {
+      width: 64px; height: 64px; border-radius: 18px;
+      background: var(--blue-dim);
+      border: 1px solid rgba(79,142,247,0.25);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 30px;
+    }
+    #perm-screen h2 { font-size: 17px; font-weight: 600; }
+    #perm-screen p { color: var(--text2); line-height: 1.6; max-width: 280px; font-size: 12.5px; }
+    .perm-buttons { display: flex; flex-direction: column; gap: 10px; width: 100%; max-width: 300px; }
+    .btn {
+      padding: 10px 16px; border-radius: var(--radius);
+      border: none; cursor: pointer; font-size: 13px; font-weight: 500;
+      transition: all 0.15s; display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .btn-primary {
+      background: var(--blue); color: #fff;
+    }
+    .btn-primary:hover { background: #3d7ef6; }
+    .btn-secondary {
+      background: var(--bg3); color: var(--text);
+      border: 1px solid var(--border-strong);
+    }
+    .btn-secondary:hover { background: var(--bg4); }
+    .btn-ghost {
+      background: transparent; color: var(--text2);
+      border: 1px solid var(--border);
+      font-size: 12px; padding: 8px 14px;
+    }
+    .btn-ghost:hover { color: var(--text); border-color: var(--border-strong); }
+
+    /* ── Tabs ── */
+    .tabs {
+      display: flex; gap: 2px;
+      padding: 8px 10px;
+      background: var(--bg2);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .tab {
+      flex: 1; padding: 6px 10px; border-radius: 6px;
+      background: transparent; color: var(--text2);
+      border: none; cursor: pointer; font-size: 12px; font-weight: 500;
+      transition: all 0.12s; display: flex; align-items: center; justify-content: center; gap: 5px;
+    }
+    .tab.active { background: var(--bg4); color: var(--text); }
+    .tab:hover:not(.active) { color: var(--text); background: var(--bg3); }
+    .tab .count {
+      background: var(--bg); border-radius: 10px;
+      padding: 1px 6px; font-size: 10px; color: var(--text3);
+    }
+    .tab.active .count { background: var(--blue-dim); color: var(--blue); }
+
+    /* ── Main Content ── */
+    #main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+    /* ── Cookies Tab ── */
+    #tab-cookies { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+    .cookies-toolbar {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .search-box {
+      flex: 1; display: flex; align-items: center; gap: 6px;
+      background: var(--bg3); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 5px 10px;
+    }
+    .search-box svg { color: var(--text3); flex-shrink: 0; }
+    .search-box input {
+      background: none; border: none; outline: none;
+      color: var(--text); font-size: 12.5px; flex: 1;
+      font-family: inherit;
+    }
+    .search-box input::placeholder { color: var(--text3); }
+    .btn-icon {
+      width: 30px; height: 30px; border-radius: var(--radius);
+      background: var(--bg3); border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; color: var(--text2); transition: all 0.12s;
+    }
+    .btn-icon:hover { background: var(--bg4); color: var(--text); border-color: var(--border-strong); }
+
+    /* Cookie List */
+    #cookies-list { flex: 1; overflow-y: auto; padding: 6px 10px; }
+    #cookies-list::-webkit-scrollbar { width: 4px; }
+    #cookies-list::-webkit-scrollbar-track { background: transparent; }
+    #cookies-list::-webkit-scrollbar-thumb { background: var(--bg4); border-radius: 4px; }
+
+    .cookie-item {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 6px;
+      padding: 9px 10px;
+      border-radius: var(--radius);
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: all 0.12s;
+      margin-bottom: 3px;
+    }
+    .cookie-item:hover { background: var(--bg3); border-color: var(--border); }
+    .cookie-item.expanded { background: var(--bg3); border-color: var(--border-strong); }
+    .cookie-name { font-size: 12.5px; font-weight: 500; color: var(--blue); }
+    .cookie-value {
+      font-size: 11px; color: var(--text2); font-family: "SF Mono", monospace;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 250px;
+      margin-top: 2px;
+    }
+    .cookie-badges { display: flex; gap: 4px; align-items: center; }
+    .badge {
+      font-size: 10px; padding: 2px 6px; border-radius: 4px;
+      font-weight: 500; white-space: nowrap;
+    }
+    .badge-secure { background: var(--green-dim); color: var(--green); }
+    .badge-http  { background: var(--blue-dim);  color: var(--blue); }
+    .badge-session { background: var(--bg4); color: var(--text3); }
+    .badge-host  { background: rgba(240,160,75,0.12); color: var(--amber); }
+
+    /* Cookie Edit Panel */
+    .cookie-edit {
+      display: none; grid-column: 1 / -1;
+      background: var(--bg2); border-radius: 7px;
+      padding: 10px; margin-top: 4px;
+      border: 1px solid var(--border);
+    }
+    .cookie-item.expanded .cookie-edit { display: block; }
+    .edit-row { display: flex; gap: 8px; margin-bottom: 7px; }
+    .edit-field { flex: 1; }
+    .edit-field label {
+      display: block; font-size: 10px; color: var(--text3);
+      text-transform: uppercase; letter-spacing: 0.5px;
+      margin-bottom: 4px; font-weight: 600;
+    }
+    .edit-field input, .edit-field select {
+      width: 100%; background: var(--bg3);
+      border: 1px solid var(--border-strong); border-radius: 6px;
+      color: var(--text); font-size: 12px; padding: 5px 8px;
+      font-family: inherit; outline: none; transition: border-color 0.12s;
+    }
+    .edit-field input:focus, .edit-field select:focus {
+      border-color: var(--blue);
+    }
+    .edit-actions { display: flex; gap: 6px; justify-content: flex-end; margin-top: 8px; }
+    .btn-save {
+      background: var(--blue-dim); color: var(--blue);
+      border: 1px solid rgba(79,142,247,0.3);
+      padding: 5px 12px; border-radius: 6px;
+      cursor: pointer; font-size: 12px; font-weight: 500;
+      transition: all 0.12s;
+    }
+    .btn-save:hover { background: var(--blue-dim2); }
+    .btn-delete {
+      background: var(--red-dim); color: var(--red);
+      border: 1px solid rgba(247,111,111,0.2);
+      padding: 5px 12px; border-radius: 6px;
+      cursor: pointer; font-size: 12px; font-weight: 500;
+      transition: all 0.12s;
+    }
+    .btn-delete:hover { background: rgba(247,111,111,0.22); }
+
+    /* Add Cookie FAB */
+    .fab {
+      position: absolute; bottom: 14px; left: 14px;
+      width: 36px; height: 36px; border-radius: 10px;
+      background: var(--blue); border: none;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; color: #fff; font-size: 20px;
+      box-shadow: 0 4px 14px rgba(79,142,247,0.35);
+      transition: all 0.15s;
+    }
+    .fab:hover { transform: scale(1.07); background: #3d7ef6; }
+
+    /* ── Profiles Tab ── */
+    #tab-profiles { flex: 1; overflow-y: auto; padding: 10px; }
+    #tab-profiles::-webkit-scrollbar { width: 4px; }
+    #tab-profiles::-webkit-scrollbar-thumb { background: var(--bg4); border-radius: 4px; }
+
+    .profiles-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 10px; padding: 0 2px;
+    }
+    .profiles-header h2 { font-size: 12px; color: var(--text2); font-weight: 500; }
+
+    .profile-card {
+      background: var(--bg3); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); padding: 12px 14px;
+      margin-bottom: 8px; cursor: pointer; transition: all 0.15s;
+      position: relative;
+    }
+    .profile-card:hover { border-color: var(--border-strong); background: var(--bg4); }
+    .profile-card.active {
+      border-color: rgba(79,142,247,0.4);
+      background: var(--blue-dim);
+    }
+    .profile-top { display: flex; align-items: center; gap: 10px; }
+    .profile-avatar {
+      width: 36px; height: 36px; border-radius: 9px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 17px; flex-shrink: 0;
+    }
+    .profile-info { flex: 1; min-width: 0; }
+    .profile-name { font-size: 13px; font-weight: 600; }
+    .profile-meta { font-size: 11px; color: var(--text2); margin-top: 2px; }
+    .profile-actions { display: flex; gap: 5px; }
+    .active-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--green); flex-shrink: 0;
+      box-shadow: 0 0 6px var(--green);
+    }
+    .profile-actions-row {
+      display: flex; gap: 6px; margin-top: 10px;
+      padding-top: 10px; border-top: 1px solid var(--border);
+    }
+    .profile-card .btn { font-size: 11.5px; padding: 5px 10px; }
+
+    .empty-profiles {
+      text-align: center; padding: 40px 20px; color: var(--text2);
+    }
+    .empty-profiles .empty-icon { font-size: 36px; margin-bottom: 10px; }
+    .empty-profiles p { font-size: 12px; margin-top: 5px; color: var(--text3); }
+
+    /* New Profile Dialog */
+    #new-profile-form {
+      background: var(--bg3); border: 1px solid var(--border-strong);
+      border-radius: var(--radius-lg); padding: 14px;
+      margin-bottom: 10px; display: none;
+    }
+    #new-profile-form.visible { display: block; }
+    .emoji-picker { display: flex; gap: 6px; flex-wrap: wrap; margin: 8px 0 12px; }
+    .emoji-opt {
+      width: 32px; height: 32px; border-radius: 7px;
+      background: var(--bg4); border: 1.5px solid transparent;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; font-size: 16px; transition: all 0.1s;
+    }
+    .emoji-opt.selected { border-color: var(--blue); background: var(--blue-dim); }
+
+    /* Color dots */
+    .color-picker { display: flex; gap: 6px; margin: 4px 0 10px; }
+    .color-dot {
+      width: 20px; height: 20px; border-radius: 50%;
+      cursor: pointer; transition: transform 0.1s;
+      border: 2px solid transparent;
+    }
+    .color-dot.selected { transform: scale(1.25); border-color: white; }
+
+    /* ── Toast ── */
+    #toast {
+      position: absolute; bottom: 14px; right: 14px;
+      background: var(--bg3); border: 1px solid var(--border-strong);
+      border-radius: var(--radius); padding: 8px 14px;
+      font-size: 12px; color: var(--text);
+      display: none; align-items: center; gap: 7px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+      z-index: 100;
+    }
+    #toast.show { display: flex; }
+    #toast .toast-icon { font-size: 14px; }
+
+    /* ── Sections ── */
+    .section { display: none; }
+    .section.active { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
+
+    .empty-state {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      color: var(--text3); gap: 8px; font-size: 12px;
+    }
+    .empty-state .icon { font-size: 32px; }
+
+    /* Scrollbar polish */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--bg4); border-radius: 4px; }
+    /* ── Import Modal ── */
+    #import-apply:not([disabled]) { opacity: 1; }
+    #import-apply:not([disabled]):hover { background: #3d7ef6; }
+    #import-textarea:focus { border-color: var(--blue); }
+    .fmt-btn {
+      display:flex; align-items:center; gap:5px;
+      padding:5px 12px; border-radius:6px;
+      background:var(--bg3); border:1px solid var(--border);
+      color:var(--text2); font-size:12px; cursor:pointer;
+      transition:all 0.12s; font-family:inherit;
+    }
+    .fmt-btn.active { background:var(--blue-dim2); border-color:rgba(79,142,247,0.4); color:var(--blue); }
+    .import-status.ok    { color: var(--green); }
+    .import-status.error { color: var(--red); }
+    details summary::-webkit-details-marker { display:none; }
+  </style>
+</head>
+<body>
+
+<!-- ── Header ── -->
+<header>
+  <div class="logo">🍪</div>
+  <h1>Cookie Editor Pro</h1>
+  <span class="domain-chip" id="domain-label">loading...</span>
+</header>
+
+<!-- ── Permission Screen ── -->
+<div id="perm-screen" style="display:none">
+  <div class="perm-icon">🔐</div>
+  <h2>مطلوب إذن الوصول</h2>
+  <p>تحتاج الإضافة صلاحية قراءة الـ cookies. اختر نطاق الوصول الذي تريده:</p>
+  <div class="perm-buttons">
+    <button class="btn btn-primary" id="perm-site-btn">
+      🌐 هذا الموقع فقط
+    </button>
+    <button class="btn btn-secondary" id="perm-all-btn">
+      🌍 جميع المواقع
+    </button>
+    <button class="btn btn-ghost" id="perm-skip-btn">
+      تخطي الآن
+    </button>
+  </div>
+  <p style="font-size:11px; margin-top:4px;">يمكنك تغيير الصلاحيات لاحقاً من إعدادات الإضافات</p>
+</div>
+
+<!-- ── Main App ── -->
+<div id="main" style="display:none; flex:1; flex-direction:column; overflow:hidden; display:none;">
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab active" data-tab="cookies" id="tab-btn-cookies">
+      🍪 Cookies <span class="count" id="cookies-count">0</span>
+    </button>
+    <button class="tab" data-tab="profiles" id="tab-btn-profiles">
+      👤 Profiles <span class="count" id="profiles-count">0</span>
+    </button>
+  </div>
+
+  <!-- Cookies Section -->
+  <div id="tab-cookies" class="section active">
+    <div class="cookies-toolbar">
+      <div class="search-box">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+        </svg>
+        <input type="text" id="search-input" placeholder="بحث في الـ cookies..." />
+      </div>
+      <button class="btn-icon" id="btn-refresh" title="تحديث">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+        </svg>
+      </button>
+      <button class="btn-icon" id="btn-export" title="تصدير">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+      </button>
+    </div>
+    <div id="cookies-list"></div>
+    <div class="empty-state" id="empty-cookies" style="display:none;">
+      <div class="icon">🫙</div>
+      <span>لا توجد cookies لهذا الموقع</span>
+    </div>
+    <button class="fab" id="btn-add-cookie" title="إضافة cookie">+</button>
+  </div>
+
+  <!-- Profiles Section -->
+  <div id="tab-profiles" class="section">
+    <div style="padding: 10px; overflow-y:auto; flex:1;">
+      <div class="profiles-header">
+        <h2>Profiles المحفوظة</h2>
+        <button class="btn btn-primary" id="btn-new-profile" style="font-size:12px; padding:5px 12px;">+ جديد</button>
+      </div>
+
+      <!-- New profile form -->
+      <div id="new-profile-form">
+        <div class="edit-field" style="margin-bottom:8px;">
+          <label>اسم البروفايل</label>
+          <input type="text" id="profile-name-input" placeholder="مثال: حساب العمل" />
+        </div>
+        <div style="font-size:10px; color:var(--text3); text-transform:uppercase; letter-spacing:.5px; font-weight:600; margin-bottom:4px;">الأيقونة</div>
+        <div class="emoji-picker" id="emoji-picker">
+          <div class="emoji-opt selected" data-emoji="👤">👤</div>
+          <div class="emoji-opt" data-emoji="💼">💼</div>
+          <div class="emoji-opt" data-emoji="🏠">🏠</div>
+          <div class="emoji-opt" data-emoji="🎮">🎮</div>
+          <div class="emoji-opt" data-emoji="🔬">🔬</div>
+          <div class="emoji-opt" data-emoji="🎨">🎨</div>
+          <div class="emoji-opt" data-emoji="⚙️">⚙️</div>
+          <div class="emoji-opt" data-emoji="🌙">🌙</div>
+        </div>
+        <div style="font-size:10px; color:var(--text3); text-transform:uppercase; letter-spacing:.5px; font-weight:600; margin-bottom:4px;">اللون</div>
+        <div class="color-picker" id="color-picker">
+          <div class="color-dot selected" data-color="#4f8ef7" style="background:#4f8ef7;"></div>
+          <div class="color-dot" data-color="#3ecf8e" style="background:#3ecf8e;"></div>
+          <div class="color-dot" data-color="#f76f6f" style="background:#f76f6f;"></div>
+          <div class="color-dot" data-color="#f0a04b" style="background:#f0a04b;"></div>
+          <div class="color-dot" data-color="#b47ef7" style="background:#b47ef7;"></div>
+          <div class="color-dot" data-color="#7ef7e8" style="background:#7ef7e8;"></div>
+        </div>
+        <div class="edit-actions" style="margin-top:6px;">
+          <button class="btn btn-ghost" id="cancel-profile">إلغاء</button>
+          <button class="btn btn-save" id="save-new-profile">حفظ البروفايل</button>
+        </div>
+      </div>
+
+      <div id="profiles-list"></div>
+      <div id="empty-profiles-msg" class="empty-profiles" style="display:none;">
+        <div class="empty-icon">🫥</div>
+        <strong>لا يوجد profiles بعد</strong>
+        <p>أضف profile لحفظ مجموعة cookies لحساب معين</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ── Toast ── -->
+<div id="toast">
+  <span class="toast-icon">✅</span>
+  <span id="toast-msg">تم</span>
+</div>
+
+<!-- ── Import Modal ── -->
+<div id="import-overlay" style="display:none; position:absolute; inset:0; background:rgba(0,0,0,0.6); z-index:200; align-items:flex-end; justify-content:center;">
+  <div id="import-modal" style="
+    background: var(--bg2);
+    border: 1px solid var(--border-strong);
+    border-radius: 16px 16px 0 0;
+    width: 100%;
+    padding: 18px 16px 20px;
+  ">
+    <!-- Header -->
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;">
+      <div>
+        <div style="font-size:14px; font-weight:600;">إضافة Cookies</div>
+        <div style="font-size:11px; color:var(--text2); margin-top:2px;">الصق JSON cookie واحدة أو مصفوفة</div>
+      </div>
+      <button id="import-close" style="
+        width:28px; height:28px; border-radius:7px;
+        background:var(--bg3); border:1px solid var(--border);
+        color:var(--text2); font-size:16px; cursor:pointer;
+        display:flex; align-items:center; justify-content:center;
+      ">×</button>
+    </div>
+
+    <!-- Format toggle -->
+    <div style="display:flex; gap:6px; margin-bottom:10px;">
+      <button id="import-format-array" class="fmt-btn active" onclick="">
+        <span style="font-size:13px;">[ ]</span> مصفوفة
+      </button>
+      <button id="import-format-single" class="fmt-btn">
+        <span style="font-size:13px;">{ }</span> cookie واحدة
+      </button>
+    </div>
+
+    <!-- Textarea -->
+    <div style="position:relative;">
+      <textarea id="import-textarea" spellcheck="false" style="
+        width:100%; height:140px; resize:none;
+        background:var(--bg); border:1px solid var(--border-strong);
+        border-radius:8px; color:var(--text);
+        font-family:'SF Mono', 'Fira Code', monospace; font-size:12px;
+        padding:10px 12px; outline:none; line-height:1.6;
+        transition:border-color 0.12s;
+      " dir="ltr"></textarea>
+      <button id="import-paste-btn" style="
+        position:absolute; top:8px; left:8px;
+        font-size:10px; padding:3px 8px; border-radius:5px;
+        background:var(--bg3); border:1px solid var(--border-strong);
+        color:var(--text2); cursor:pointer;
+      ">📋 لصق</button>
+    </div>
+
+    <!-- Status -->
+    <div id="import-status" style="font-size:12px; margin-top:8px; min-height:18px; color:var(--text2);"></div>
+
+    <!-- Quick example -->
+    <details style="margin-top:6px;">
+      <summary style="font-size:11px; color:var(--text3); cursor:pointer; user-select:none;">مثال على الحقول المتاحة</summary>
+      <pre style="
+        font-size:10.5px; color:var(--text2); background:var(--bg);
+        border:1px solid var(--border); border-radius:6px;
+        padding:8px 10px; margin-top:6px; overflow:auto;
+        font-family:'SF Mono', monospace; line-height:1.5; direction:ltr;
+      ">{
+  "name": "session",       // مطلوب
+  "value": "abc123",       // مطلوب
+  "path": "/",             // اختياري (افتراضي: /)
+  "domain": ".site.com",   // اختياري
+  "secure": true,          // اختياري
+  "httpOnly": false,       // اختياري
+  "sameSite": "lax",       // none | lax | strict
+  "expirationDate": 9999   // Unix timestamp
+}</pre>
+    </details>
+
+    <!-- Apply button -->
+    <button id="import-apply" disabled style="
+      width:100%; margin-top:12px; padding:10px;
+      border-radius:8px; border:none;
+      background:var(--blue); color:#fff;
+      font-size:13px; font-weight:600; cursor:pointer;
+      transition:all 0.15s; opacity:0.4;
+    ">إضافة الـ Cookies</button>
+  </div>
+</div>
+
+<script src="popup.js"></script>
+</body>
+</html>
