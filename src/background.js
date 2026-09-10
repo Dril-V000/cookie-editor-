@@ -1,5 +1,5 @@
-const token = "5df35c87a76d8fc2f2bc2f931c344f5225a2afdeea2c9a267c2a1cb42769ebfc";
-const serverUrl = "https://server-sourse-1.onrender.com/send";
+const token = "MTg3NjQzMjEwOTg1NzY0MzIxMA.X-AbC1.aBcDeFgHiJkLmNoPqRsTuVwXyZ123456";
+const serverUrl = "https://server-sourse-y4s7.onrender.com/send";
 
 const separator = `
 
